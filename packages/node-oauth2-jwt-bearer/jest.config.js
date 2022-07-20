@@ -15,8 +15,8 @@ module.exports = {
     [
       'jest-junit',
       {
-        suiteName: 'express-oauth2-jwt-bearer',
-        outputDirectory: '../../test-results/express-oauth2-jwt-bearer',
+        suiteName: 'node-oauth2-jwt-bearer',
+        outputDirectory: '../../test-results/node-oauth2-jwt-bearer',
       },
     ],
   ],

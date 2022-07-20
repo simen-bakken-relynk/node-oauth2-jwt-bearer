@@ -1,10 +1,10 @@
-# express-oauth2-jwt-bearer
+# node-oauth2-jwt-bearer
 
 Authentication middleware for Express.js that validates JWT Bearer Access Tokens.
 
 [![CircleCI](https://img.shields.io/circleci/build/github/auth0/node-oauth2-jwt-bearer.svg?branch=master&style=flat)](https://circleci.com/gh/auth0/node-oauth2-jwt-bearer)
 [![License](https://img.shields.io/:license-mit-blue.svg?style=flat)](https://opensource.org/licenses/MIT)
-[![npm](https://img.shields.io/npm/v/express-oauth2-jwt-bearer.svg?style=flat)](https://www.npmjs.com/package/express-oauth2-jwt-bearer)
+[![npm](https://img.shields.io/npm/v/node-oauth2-jwt-bearer.svg?style=flat)](https://www.npmjs.com/package/node-oauth2-jwt-bearer)
 [![codecov](https://img.shields.io/badge/coverage-100%25-green)](./jest.config.js#L6-L13)
 
 - [Install](#install)
@@ -24,7 +24,7 @@ Authentication middleware for Express.js that validates JWT Bearer Access Tokens
 This package supports Node `^12.19.0 || ^14.15.0 || ^16.13.0`
 
 ```shell
-npm install express-oauth2-jwt-bearer
+npm install node-oauth2-jwt-bearer
 ```
 
 ## Getting started
@@ -37,33 +37,33 @@ AUDIENCE=https://my-api.com
 ```
 
 ```js
-const { auth } = require('express-oauth2-jwt-bearer');
+const { auth } = require('node-oauth2-jwt-bearer');
 app.use(auth());
 ```
 
 ... or in the library initialization:
 
 ```js
-const { auth } = require('express-oauth2-jwt-bearer');
+const { auth } = require('node-oauth2-jwt-bearer');
 app.use(
-    auth({
-      issuerBaseURL: 'https://YOUR_ISSUER_DOMAIN',
-      audience: 'https://my-api.com'
-    })
+  auth({
+    issuerBaseURL: 'https://YOUR_ISSUER_DOMAIN',
+    audience: 'https://my-api.com',
+  })
 );
 ```
 
 ... or for JWTs signed with symmetric algorithms (eg `HS256`)
 
 ```js
-const { auth } = require('express-oauth2-jwt-bearer');
+const { auth } = require('node-oauth2-jwt-bearer');
 app.use(
-    auth({
-      issuer: 'https://YOUR_ISSUER_DOMAIN',
-      audience: 'https://my-api.com',
-      secret: 'YOUR SECRET',
-      tokenSigningAlg: 'HS256'
-    })
+  auth({
+    issuer: 'https://YOUR_ISSUER_DOMAIN',
+    audience: 'https://my-api.com',
+    secret: 'YOUR SECRET',
+    tokenSigningAlg: 'HS256',
+  })
 );
 ```
 
@@ -72,14 +72,12 @@ With this basic configuration, your api will require a valid Access Token JWT be
 Successful requests will have the following properties added to them:
 
 ```js
-app.get('/api/messages',
-    (req, res, next) => {
-      const auth = req.auth;
-      auth.header; // The decoded JWT header.
-      auth.payload;  // The decoded JWT payload.
-      auth.token; // The raw JWT token.
-    }
-);
+app.get('/api/messages', (req, res, next) => {
+  const auth = req.auth;
+  auth.header; // The decoded JWT header.
+  auth.payload; // The decoded JWT payload.
+  auth.token; // The raw JWT token.
+});
 ```
 
 ## API Documentation
@@ -99,20 +97,21 @@ const {
   requiredScopes,
   claimEquals,
   claimIncludes,
-  claimCheck
-} = require('express-oauth2-jwt-bearer');
+  claimCheck,
+} = require('node-oauth2-jwt-bearer');
 
 // Initialise the auth middleware with environment variables and restrict
 // access to your api to users with a valid Access Token JWT
 app.use(auth());
 
 // Restrict access to the messages api to users with the `read:msg`
-// AND `write:msg` scopes  
-app.get('/api/messages',
-    requiredScopes('read:msg', 'write:msg'),
-    (req, res, next) => {
-      // ...
-    }
+// AND `write:msg` scopes
+app.get(
+  '/api/messages',
+  requiredScopes('read:msg', 'write:msg'),
+  (req, res, next) => {
+    // ...
+  }
 );
 
 // Restrict access to the admin api to users with the `isAdmin: true` claim
@@ -122,20 +121,22 @@ app.get('/api/admin', claimEquals('isAdmin', true), (req, res, next) => {
 
 // Restrict access to the managers admin api to users with both the role `admin`
 // AND the role `manager`
-app.get('/api/admin/managers',
-    claimIncludes('role', 'admin', 'manager'),
-    (req, res, next) => {
-      // ...
-    }
+app.get(
+  '/api/admin/managers',
+  claimIncludes('role', 'admin', 'manager'),
+  (req, res, next) => {
+    // ...
+  }
 );
 
 // Restrict access to the admin edit api to users with the `isAdmin: true` claim
 // and the `editor` role.
-app.get('/api/admin/edit',
-    claimCheck(({ isAdmin, roles }) => isAdmin && roles.includes('editor')),
-    (req, res, next) => {
-      // ...
-   }
+app.get(
+  '/api/admin/edit',
+  claimCheck(({ isAdmin, roles }) => isAdmin && roles.includes('editor')),
+  (req, res, next) => {
+    // ...
+  }
 );
 ```
 

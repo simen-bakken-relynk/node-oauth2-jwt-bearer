@@ -10,7 +10,6 @@
   "include": [
     "packages/oauth2-bearer/src",
     "packages/access-token-jwt/src",
-    "packages/express-oauth2-jwt-bearer/src",
+    "packages/node-oauth2-jwt-bearer/src"
   ]
 }
-

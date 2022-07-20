@@ -5,7 +5,7 @@ jobs:
   test:
     executor:
       name: ship/node
-      tag: 'lts'
+      tag: "lts"
     steps:
       - checkout
       - ship/node-install-packages
@@ -19,8 +19,8 @@ workflows:
     jobs:
       - test
       - ship/node-publish:
-          publish-command: npm run build && npm publish --workspace=packages/express-oauth2-jwt-bearer
-          app-directory: "packages/express-oauth2-jwt-bearer"
+          publish-command: npm run build && npm publish --workspace=packages/node-oauth2-jwt-bearer
+          app-directory: "packages/node-oauth2-jwt-bearer"
           requires:
             - test
           context:
