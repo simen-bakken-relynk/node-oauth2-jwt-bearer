@@ -1,27 +1,15 @@
-import { Handler, NextFunction, Request, Response } from 'express';
+import { Request } from 'express';
 import {
   jwtVerifier,
   JwtVerifierOptions,
   claimCheck as _claimCheck,
-  ClaimCheck,
   claimEquals as _claimEquals,
-  ClaimEquals,
   claimIncludes as _claimIncludes,
-  ClaimIncludes,
   requiredScopes as _requiredScopes,
-  RequiredScopes,
   VerifyJwtResult as AuthResult,
 } from 'access-token-jwt';
 import type { JWTPayload } from 'access-token-jwt';
 import { getToken } from 'oauth2-bearer';
-
-declare global {
-  namespace Express {
-    interface Request {
-      auth?: AuthResult;
-    }
-  }
-}
 
 /**
  * Middleware that will return a 401 if a valid JWT bearer token is not provided
@@ -59,35 +47,22 @@ declare global {
  * used to match against the Access Token's `aud` claim.
  *
  */
-export const auth = (opts: JwtVerifierOptions = {}): Handler => {
+export const auth = (
+  opts: JwtVerifierOptions = {}
+): ((req: Request) => Promise<AuthResult>) => {
   const verifyJwt = jwtVerifier(opts);
 
-  return async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const jwt = getToken(
-        req.headers,
-        req.query,
-        req.body,
-        !!req.is('urlencoded')
-      );
-      req.auth = await verifyJwt(jwt);
-      next();
-    } catch (e) {
-      next(e);
-    }
+  return async (req: Request) => {
+    const jwt = getToken(
+      req.headers,
+      req.query,
+      req.body,
+      !!req.is('urlencoded')
+    );
+    const authResult = await verifyJwt(jwt);
+    return authResult;
   };
 };
-
-const toHandler =
-  (fn: (payload?: JWTPayload) => void): Handler =>
-  (req, res, next) => {
-    try {
-      fn(req.auth?.payload);
-      next();
-    } catch (e) {
-      next(e);
-    }
-  };
 
 /**
  * Check the token's claims using a custom method that receives the
@@ -103,8 +78,7 @@ const toHandler =
  * }, `Unexpected 'isAdmin' and 'roles' claims`), (req, res) => { ... });
  * ```
  */
-export const claimCheck: ClaimCheck<Handler> = (...args) =>
-  toHandler(_claimCheck(...args));
+export const claimCheck = _claimCheck;
 
 /**
  * Check a token's claim to be equal a given {@Link JSONPrimitive}
@@ -117,8 +91,7 @@ export const claimCheck: ClaimCheck<Handler> = (...args) =>
  * app.get('/admin', claimEquals('isAdmin', true), (req, res) => { ... });
  * ```
  */
-export const claimEquals: ClaimEquals<Handler> = (...args) =>
-  toHandler(_claimEquals(...args));
+export const claimEquals = _claimEquals;
 
 /**
  * Check a token's claim to include a number of given {@Link JSONPrimitive}s
@@ -132,8 +105,7 @@ export const claimEquals: ClaimEquals<Handler> = (...args) =>
  *    (req, res) => { ... });
  * ```
  */
-export const claimIncludes: ClaimIncludes<Handler> = (...args) =>
-  toHandler(_claimIncludes(...args));
+export const claimIncludes = _claimIncludes;
 
 /**
  * Check a token's `scope` claim to include a number of given scopes, raises a
@@ -147,8 +119,7 @@ export const claimIncludes: ClaimIncludes<Handler> = (...args) =>
  *    (req, res) => { ... });
  * ```
  */
-export const requiredScopes: RequiredScopes<Handler> = (...args) =>
-  toHandler(_requiredScopes(...args));
+export const requiredScopes = _requiredScopes;
 
 export { JwtVerifierOptions as AuthOptions, AuthResult, JWTPayload };
 export {
