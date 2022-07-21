@@ -40,7 +40,9 @@
     "typescript": "^4.5.4"
   },
   "dependencies": {
-    "jose": "^4.3.7"
+    "jose": "^4.3.7",
+    "oauth2-bearer": "*",
+    "access-token-jwt": "*"
   },
   "engines": {
     "node": "^12.19.0 || ^14.15.0 || ^16.13.0"
