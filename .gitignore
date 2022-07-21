@@ -2,6 +2,9 @@
 
 .env
 
+**/test
+**/dist
+
 # dependencies
 node_modules
 .pnp
