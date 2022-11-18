@@ -20,40 +20,48 @@ const checkJSONPrimitive = (value: JSONPrimitive): void => {
   }
 };
 
-const isClaimIncluded = (
-  claim: string,
-  expected: JSONPrimitive[]
-): ((payload: JWTPayload) => boolean) => (payload) => {
-  if (!(claim in payload)) {
-    throw new InvalidTokenError(`Missing '${claim}' claim`);
-  }
+const isClaimIncluded =
+  (
+    claim: string,
+    expected: JSONPrimitive[]
+  ): ((payload: JWTPayload) => boolean) =>
+  (payload) => {
+    if (!(claim in payload)) {
+      throw new InvalidTokenError(`Missing '${claim}' claim`);
+    }
 
-  let actual = payload[claim];
-  if (typeof actual === 'string') {
-    actual = actual.split(' ');
-  } else if (!Array.isArray(actual)) {
-    return false;
-  }
+    let actual = payload[claim];
+    if (typeof actual === 'string') {
+      actual = actual.split(' ');
+    } else if (!Array.isArray(actual)) {
+      return false;
+    }
 
-  actual = new Set(actual as JSONPrimitive[]);
+    actual = new Set(actual as JSONPrimitive[]);
 
-  return expected.every(Set.prototype.has.bind(actual));
-};
+    return expected.every(Set.prototype.has.bind(actual));
+  };
 
-export type RequiredScopes<R = ClaimChecker> = (scopes: string | string[]) => R;
+export type RequiredScopes<R = ClaimChecker> = (
+  scopes: string | string[],
+  scopeKeyOverride?: string
+) => R;
 
-export const requiredScopes: RequiredScopes = (scopes) => {
+export const requiredScopes: RequiredScopes = (scopes, scopeKeyOverride?) => {
   if (typeof scopes === 'string') {
     scopes = scopes.split(' ');
   } else if (!Array.isArray(scopes)) {
     throw new TypeError("'scopes' must be a string or array of strings");
   }
-  const fn = isClaimIncluded('scope', scopes);
+
+  const scopeKey = scopeKeyOverride || 'scope';
+
+  const fn = isClaimIncluded(scopeKey, scopes);
   return claimCheck((payload) => {
-    if (!('scope' in payload)) {
+    if (!(scopeKey in payload)) {
       throw new InsufficientScopeError(
         scopes as string[],
-        "Missing 'scope' claim"
+        "Missing 'scopeKey' claim"
       );
     }
     if (!fn(payload)) {
